@@ -1,0 +1,43 @@
+@host = https://localhost:7292
+@customer = aaaaaaaa-1111-1111-1111-111111111111
+@agent = bbbbbbbb-2222-2222-2222-222222222222
+@admin = cccccccc-3333-3333-3333-333333333333
+@agent2 = dddddddd-4444-4444-4444-444444444444
+
+### 1) Department
+# @name dept
+POST {{host}}/api/departments
+Content-Type: application/json
+
+{ "name": "IT Support {{$guid}}" }
+
+### 2) Category
+# @name cat
+POST {{host}}/api/categories
+Content-Type: application/json
+
+{ "name": "Hardware", "departmentId": "{{dept.response.body.$.id}}" }
+
+### 3) Create ticket (Customer)
+# @name ticket
+POST {{host}}/api/tickets
+Content-Type: application/json
+X-Actor-Id: {{customer}}
+X-Actor-Role: Customer
+
+{
+  "title": "Printer broken",
+  "description": "No paper feed",
+  "categoryId": "{{cat.response.body.$.id}}",
+  "priority": "High"
+}
+
+### 4) Claim (SupportAgent)
+POST {{host}}/api/tickets/{{ticket.response.body.$.id}}/claim
+X-Actor-Id: {{agent}}
+X-Actor-Role: SupportAgent
+
+### 5) Claim again with another agent (expect 422)
+POST {{host}}/api/tickets/{{ticket.response.body.$.id}}/claim
+X-Actor-Id: {{agent2}}
+X-Actor-Role: SupportAgent
