@@ -1,0 +1,1 @@
+﻿public record CategoryDto(Guid Id, string Name, Guid DepartmentId);
